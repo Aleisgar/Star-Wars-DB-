@@ -8,26 +8,51 @@ from eralchemy import render_er
 
 Base = declarative_base()
 
-class Person(Base):
-    __tablename__ = 'person'
-    # Here we define columns for the table person
-    # Notice that each column is also a normal Python instance attribute.
+class User(Base):
+    __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+    user_name = Column(String(20), unique=True, nullable=False)
+    email = Column(String(30), unique=True, nullable=False)
+    password= Column(Integer, unique=False, nullable=False)
+    id_user = relationship('favorites', backref='user', lazy=True)
 
-class Address(Base):
-    __tablename__ = 'address'
-    # Here we define columns for the table address.
-    # Notice that each column is also a normal Python instance attribute.
+class Favorites(Base):
+    __tablename__ = 'favorites'
     id = Column(Integer, primary_key=True)
-    street_name = Column(String(250))
-    street_number = Column(String(250))
-    post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
+    user_id = Column(Integer, ForeignKey('user.id'),nullable=False)
+    character_id = Column(Integer, ForeignKey('character.id'),nullable=True)
+    planet_id = Column(Integer, ForeignKey('planet.id'),nullable=True) 
+    ship_id = Column(Integer, ForeignKey('ships.id'),nullable=True)
+         
+class Character(Base):
+    __tablename__ = 'character'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(30), unique=True, nullable=False)
+    eye_color = Column(String(30), unique=False, nullable=False)
+    hair_color = Column(String(30), unique=False, nullable=False)
+    planet_id = Column(Integer, ForeignKey('planet.id'), nullable=False)
+    ships_id = Column(Integer, ForeignKey('ships.id'),nullable=False)
+    favorite_character = relationship('favorites', backref='character', lazy=True)
 
-    def to_dict(self):
-        return {}
+class Planet(Base):
+    __tablename__ = 'planet'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(20), unique=True, nullable=False)
+    population = Column(Integer, unique=False, nullable=False)
+    characters = relationship('character', backref='planet', lazy=True)
+    favorite_planet = relationship('favorites', backref='planet', lazy=True)
+    
+
+class Ships(Base):
+    __tablename__ = 'ships'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(20), unique=True, nullable=False)
+    model = Column(String(30), unique=False, nullable=False)
+   
+  
+
+    # def __repr__(self):
+    #     return '<User %r>' % self.username
 
 ## Draw from SQLAlchemy base
 render_er(Base, 'diagram.png')
